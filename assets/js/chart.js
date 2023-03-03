@@ -43,13 +43,21 @@ function setChartType(type)
         $(met).addClass('active');
     }
     chartType = type;
+	var x = document.getElementById("SideBar");
+	var d2 = document.getElementById("dataChart2");
+	d2.style.display = "none";
+	x.style.display = "block";
+
     if(type == "MetData")
     {
-       drawMetChart();
+	   x.style.display = "none";
+	   d2.style.display = "block";
+       drawMetChart(1);
+       drawMetChart(2);
     }
     else
     {
-   drawDataChart();
+		drawDataChart();
     }
 }
 function drawCharts(table, pot) {
@@ -68,9 +76,11 @@ function maxValue(potWts)
     return maxWt;
 }
  
-function drawMetChart() {
+function drawMetChart(chartNo) {
     Highcharts.setOptions({global: {useUTC: false}, xAxis: { type: 'datetime'}});
     var seriesOptions = [];
+	
+	
     $.getJSON('jsonp.php?table=0&chartType=' + chartType + '&callback=?', function(data) {
     // load the data    
 	var metData = new Array();
@@ -83,15 +93,23 @@ function drawMetChart() {
  
     var lastStr = Highcharts.dateFormat(' %A  %b %e, %H:%M', data[data.length-1][0]);
     var titleStr = 'Met Data';
+	
+	var offset = 0;
    
-        //for(var i=0;i<3;i++){
-        //        seriesOptions.push({name : 'Pot ' + (i+1),data : metData[i]});
-		//}
+    if(chartNo == 1){
+	   box = 'dataChart';
+	}
+	else{
+	   box = 'dataChart2';
+	   titleStr = 'External Met Data';
+	   offset = 3;
+	}
+	
    
        // Create the chart
        window.chart = new Highcharts.StockChart({
             chart : {
-                renderTo : 'dataChart'
+                renderTo : box
             },
 			tooltip: {      
 				useHTML: true,
@@ -149,28 +167,21 @@ function drawMetChart() {
 			}],        
 			xAxis: { type: 'datetime'},
 			series: [{
-				name: 'ExternalRadiation',
-				yAxis: 1,
-				data: metData[5],
-				tooltip: {
-					valueSuffix: ' mm'
-                }
-			}, { 
 				name: 'Radiation',
 				yAxis: 1,
-				data: metData[2],
+				data: metData[2 + offset],
 				tooltip: {
 					valueSuffix: ' mm'
 					}
             }, {
 				name: 'Temperature',
-				data: metData[1],
+				data: metData[1 + offset],
 				tooltip: {
 					valueSuffix: '°C'
                 }
             }, {
 				name: 'Humidity',
-				data: metData[0],
+				data: metData[0 + offset],
 				tooltip: {
 					valueSuffix: '°C'
                 }
